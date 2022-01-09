@@ -18,6 +18,7 @@ public class GraphEdge {
 	 * @param the end node.
 	 */	
 	public GraphEdge(GraphNode f, GraphNode t) {
+		
 		this.from = f;
 		this.to = t;
 		this.length = 0;
