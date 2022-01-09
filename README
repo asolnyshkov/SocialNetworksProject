@@ -1,45 +1,58 @@
 /-------------------------------------------------------------------------
-/ Starter Code for Capstone Project in the
+/ Capstone Project in the
 / Java Programming: Object Oriented Design of 
 / Data Structures Specialization:
 /
 / Capstone: Analyzing (Social) Network Data
 / https://www.coursera.org/learn/intermediate-programming-capstone
 /
-/ Authored by UCSD MOOC Team:
-/ Mia Minnes, Christine Alvarado, Leo Porter, Alec Brickner
-/ and Adam Setters
+/ Authored by Aleksandr Solnyshkov
 /
-/ Date: 3/21/2016
+/ Date: 1/09/2022
 /-------------------------------------------------------------------------
 
 ---------------------------------------------------------[ DESCRIPTION ]--
 
-The files provided are skeleton code, as well as grading previews and 
-testing files to be used in completing the course programming 
-assignments. No code will be provided for the capstone project.
+1. Overview
+Search for communities based on data from a social network.
 
----------------------------------------------------------------[ FILES ]--
+2. Data 
+There is the real-world social network data set got from project Social Structure of Facebook Networks Facebook (https://archive.org/details/oxford-2005-facebook-matrix). Researchers from this project investigated the same problem of identifying communities, examinimg larger-scale groupings by detecting communities. I used a simplified version of the same data from the current UCSD course where there are about 15 thousand records and also two sets of 1000 and 2000 vertices.
 
-Below are the files provided for the warm-up assignment in week 1:
+3. Questions
+Highlighting communities in a social network, clustering a graph is a topic that many scientists pay very much attention to, and there are many references to this on the Internet. Since the problem is considered NP-complete, no solution has been found, but there are a number of methods that are used in this case with varying degrees of success.
+The first "easy" question to be resolved will be in two directions. The first is how the graph clustering problem can be solved using the libraries available in java. The second is the calculation of the shortest path for each node, in order to use this in the future to calculate the betweenness.
+The main question is the clustering of our data.
 
-graph.Graph.java
-graph.CapGraph.java
-util.GraphLoader.java
-graph.grader.Grader.java
-graph.grader.EgoGrader.java
-graph.grader.SCCGrader.java
+4. Algorithms, Data Structures, and Answer to my Question
+First I implemented a graph clustering algorithm using the JgraphT library. I used SimpleGraph from this library, loaded the data from a file there, and then I used the GirvanNewmanClustering, KspanningTreeClustering and LabelPropagationClustering methods to cluster the data.
 
-Data files and information about them can be found in the 
-data/ directory.
+Than I used the betweenness calculation algorithm at the initial stage of the main clustering algorithm. Mia talked about it.
+Basic algorithm:
+- Compute betweenness of all edges
+- for each node v 
+	1 bfs of graph starting at v
+	2 compute # shortest paths from v to each other node
+	3 distribute flow to edges along these paths
+- remove edge(s) of highest betweenness
+- repeat until there are no more edges, or until have separated graph into desired number of components.
 
----------------------------------------------------------------[ SETUP ]-- 
+I used the structure HashMap<Integer, GraphNode>  for verteces inside CapGraph class and HashMap<Integer, GraphEdge> for edges inside each GraphNode.
 
-Importing Project into eclipse:
-	1. Create a new Java Project in your workspace
-	2. Import the starter files:
-	  File -> Import -> Select "File System" -> Next -> Browse and set 
-	  root directory to folder contents of zip were extracted to -> Finish
+From the described algorithm, I managed to implement everything, but the algorithm turned out with a very long execution time even for 1000 nodes. Depth First Search takes O (V + E) time. Finding the optimal path for each pair of vertices takes O (V2). 
+When calculating the path, a unit of weight is added for each edge involved in the path. Thus, the edges with the maximum weight are formed. I removed one or even several edges with the greatest weight and repeated the calculation again, sometimes not getting clusters on real data as a result. Spending again O (V2) on every attempt to select at least two clusters. 
 
-Feel free to use another IDE or manually compile and run your programs.
-If you need help, Google is your friend.
+The main question to be solved is to implement an algorithm capable of creating at least two clusters from an existing real database of 1000 records in a reasonable time.
+
+5. Algorithm Analysis
+I understand that the applied clustering method (Girvan–Newman algorithm) has no prospects when processing large arrays, since the algorithm is not optimal, it requires several array passes per node (O(m2n)). To optimize the process, they now prefer to use maximization of modularity, for example, according to the Louvain method. The last one I have not done yet. 
+ 
+6. Correctness verification
+I used simplified, no more than 10 vertices, versions of the graphs
+with two groups of connected vertices and one edge between them, with two edges, with three groups of vertices and one connection between each two. I got the desired result in tests, but could not achieve the separation of clusters in a group of 1000 vertices.
+
+Maybe the groups weren't explicitly expressed, and each iteration took too long
+
+7. Reflection
+In general, the goal has not changed - to split the graph into clusters. But only one algorithm have remained in the implementation yet and I divided with it the graph into two clusters.
+

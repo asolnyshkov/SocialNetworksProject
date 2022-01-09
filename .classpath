@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/home/alex/eclipse-workspace/jgrapht-1.5.1/lib/antlr4-runtime-4.8-1.jar"/>
 	<classpathentry kind="lib" path="/home/alex/eclipse-workspace/jgrapht-1.5.1/lib/commons-lang3-3.9.jar"/>
 	<classpathentry kind="lib" path="/home/alex/eclipse-workspace/jgrapht-1.5.1/lib/commons-math3-3.6.1.jar"/>
@@ -25,5 +24,6 @@
 	<classpathentry kind="lib" path="/home/alex/eclipse-workspace/jgrapht-1.5.1/lib/sux4j-5.2.3.jar"/>
 	<classpathentry kind="lib" path="/home/alex/eclipse-workspace/jgrapht-1.5.1/lib/webgraph-3.6.10.jar"/>
 	<classpathentry kind="lib" path="/home/alex/eclipse-workspace/jgrapht-1.5.1/lib/webgraph-big-3.6.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-11-openjdk-amd64"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
