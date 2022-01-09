@@ -55,4 +55,3 @@ Maybe the groups weren't explicitly expressed, and each iteration took too long
 
 7. Reflection
 In general, the goal has not changed - to split the graph into clusters. But only one algorithm have remained in the implementation yet and I divided with it the graph into two clusters.
-
