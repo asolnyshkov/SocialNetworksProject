@@ -34,6 +34,8 @@ public class CapGraph implements Graph {
 	 * Create a new empty CapGraph
 	 */
 	public CapGraph() {
+		
+		
 		numEdges = 0;
 		vertexMap = new HashMap<Integer, GraphNode>();
 		scc = new ArrayList<Graph>();
