@@ -89,6 +89,7 @@ public class EgoGrader extends Grader {
                             break;
                         }
                     }
+                    sc.close();
                 }
                 if (!failed) {
                     feedback += "PASSED.";
