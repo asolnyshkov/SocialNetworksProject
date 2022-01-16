@@ -15,9 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Stack;
 import java.util.TreeMap;
 
 import util.GraphLoader;
@@ -26,19 +24,17 @@ public class CapGraph implements Graph {
 	
 	private int numEdges;
 	private HashMap<Integer, GraphNode> vertexMap;
-	private List<Graph> scc;
 	private boolean multiclustering;
 	private List <HashSet<Integer>> clusters;
 	
 	/**
 	 * Create a new empty CapGraph
 	 */
-	public CapGraph() {
-		
+	public CapGraph() {		
 		
 		numEdges = 0;
 		vertexMap = new HashMap<Integer, GraphNode>();
-		scc = new ArrayList<Graph>();
+
 		multiclustering = false;
 		clusters = new ArrayList<HashSet<Integer>>();
 	}
@@ -167,94 +163,10 @@ public class CapGraph implements Graph {
      */
 	@Override
 	public List<Graph> getSCCs() {
-		Stack<Integer> vertices = new Stack<Integer>();
-		vertices.addAll(this.getVertexes());
-		
-		vertices = dfs(this, vertices, false);
-		CapGraph out = transpose(this);
-		vertices = dfs(out, vertices, true);
-		
-		return this.scc;
-	}
-	
-	/**
-	 * Returns stack of vertixes after DFS.  
-	 * @param currect graph.
-	 * @param stack of vertixes.
-	 * @param boolean flag of the finish stage.
-     * @return The stack of vertixes after DFS. 
-     */	
-	public Stack<Integer> dfs(CapGraph g, Stack<Integer> vertices, boolean finishStage) {
-		HashSet<Integer> visited = new HashSet<Integer>();	
-		Stack<Integer> finished = new Stack<Integer>();
-		while(!vertices.empty()) {
-			Integer v = vertices.pop();
-			CapGraph component = new CapGraph();
-
-			if (!visited.contains(v)) {
-				component = dfsVisit(g, v, visited, finished, component, finishStage);
-				if (finishStage) {
-					scc.add(component);
-				}
-			}		
-		}
-		return finished;
-	}
-	
-	/**
-	 * Returns SCC.  
-	 * @param currect graph.
-	 * @param currect vertix.
-	 * @param stack of visited vertixes.
-	 * @param stack of finished vertixes.
-	 * @param currect component.
-	 * @param boolean flag of the finish stage.
-     * @return The stack of vertixes after DFS. 
-     */		
-	public CapGraph dfsVisit(CapGraph g, int v, HashSet<Integer> visited, Stack<Integer> finished, 
-			CapGraph component, boolean finishStage) {
-		visited.add(v);
-		GraphNode node = g.getVertex(v);
-	    Iterator<Integer> e = (node.getNeighborPoints()).iterator();
-	    while (e.hasNext()) {
-	    	Integer n = e.next();
-			if(!visited.contains(n)) {
-				component = dfsVisit(g, n, visited, finished, component, finishStage);
-			}
-	    }
-		if (finishStage) {
-			component.addVertex(v);
-		}	    
-	    finished.push(v);
-	    
-	    return component;
+		Dfs d = new Dfs();
+		return d.getSCCs(this);
 	}
 
-	/**
-	 * Returns transposed graph.  
-	 * @param currect graph.
-     * @return The transposed graph. 
-     */	
-	public CapGraph transpose(CapGraph in) {
-		CapGraph out = new CapGraph();
-		
-	    Iterator<Integer> v = (in.getVertexes()).iterator();
-	    while (v.hasNext()) {
-	    	Integer next = v.next();
-	    	out.addVertex(next);
-	    	GraphNode startIn = in.getVertex(next);
-	    	GraphNode startOut = out.getVertex(next);
-		    Iterator<Integer> e = (startIn.getNeighborPoints()).iterator();
-		    while (e.hasNext()) {
-		    	Integer to = e.next();
-		    	out.addVertex(to);
-				GraphNode endOut = out.getVertex(to);
-				endOut.addEdge(startOut);
-		    }	    	
-	    }
-		return out;
-	}	
-	
     /** 
      * Return the graph's connections in a readable format. 
      * The keys in this HashMap are the vertices in the graph.
@@ -313,7 +225,9 @@ public class CapGraph implements Graph {
 	private boolean dijkstraSearch(int start, int goal, HashMap<Integer, Integer> parentMap)
 	{
 		HashSet<Integer> visited = new HashSet<Integer>();
-	    Comparator<GraphNode> comparator = new GraphNodeComparator();
+
+	    Comparator<GraphNode> comparator = (o1, o2) -> o1.getDistance().compareTo(o2.getDistance());
+	    
 		PriorityQueue<GraphNode> queue = new PriorityQueue<GraphNode>(getNumVertices(), comparator);
 	
 		GraphNode startNode = this.getVertex(start);
@@ -335,7 +249,7 @@ public class CapGraph implements Graph {
 				for(Integer next: neighbors) {
 					GraphNode nextNode = this.getVertex(next);
 					if (!visited.contains(next)) {
-						double lweight = curr.getDistance(nextNode);
+						Double lweight = curr.getDistance(nextNode);
 
 						if(lweight < nextNode.getDistance()) {
 							nextNode.setDistance(lweight);
@@ -435,14 +349,7 @@ public class CapGraph implements Graph {
 		TreeMap<Integer, GraphNode> treeMap = new TreeMap<>(this.vertexMap);
 		Integer max =  treeMap.lastKey();
 		boolean[][] visited = new boolean [max+1][max+1];
-		
-		/*
-			Comparator<GraphEdge> comparator = new Comparator<GraphEdge>() {
-	    		public int compare(GraphEdge o1, GraphEdge o2) {
-	    			return o2.getWeight().compareTo(o1.getWeight());
-	    	}
-	    };	
-	    */	
+			
 	    Comparator<GraphEdge> comparator = (o1, o2) -> o2.getWeight().compareTo(o1.getWeight());
 	    
 	    List<GraphEdge> queue = new ArrayList<GraphEdge>(getNumEdges());

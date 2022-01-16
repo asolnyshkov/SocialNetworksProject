@@ -13,7 +13,7 @@ import java.util.HashSet;
 public class GraphNode {
 	private int point;
 	private HashMap<Integer, GraphEdge> edgesMap;
-	private double distance;
+	private Double distance;
 
 	static final double DEFAULT_DISTANCE = Double.POSITIVE_INFINITY;
 	
@@ -114,7 +114,7 @@ public class GraphNode {
 	 * 
 	 * @return The weight.
 	 */		
-	public double getDistance() {
+	public Double getDistance() {
 		return distance;
 	}	
 	
@@ -123,7 +123,7 @@ public class GraphNode {
 	 * @param neighbor  The neighbor node
 	 * @return The weight or infinity, if edge wasn't found.
 	 */
-	public double getDistance(GraphNode neighbor) {
+	public Double getDistance(GraphNode neighbor) {
 		for(GraphEdge edge : getEdges()) {
 			if(edge.getTo().equals(neighbor)) {
 				return distance + edge.getLength();
