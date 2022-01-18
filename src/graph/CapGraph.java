@@ -265,45 +265,6 @@ public class CapGraph implements Graph {
 		//this.printPoints(visited);
 		return found;
 	}
-
-	private void checkClusters(List<GraphEdge> list) {
-		this.clusters = new ArrayList<HashSet<Integer>>();
-		for(GraphEdge e: list) {
-			int start = e.getFrom().getPoint();
-			int goal = e.getTo().getPoint();
-			boolean s = false;
-			int curr = 0;
-			int i = 0;
-			for (HashSet<Integer> c : this.clusters) {
-			    if((c.contains(start) || c.contains(goal) && !s)) {
-			    	c.add(start);
-			    	c.add(goal);			    	
-			    	s = true;
-			    	curr = i;
-			    } else if((c.contains(start) || c.contains(goal) && s))  {
-			    	HashSet<Integer> c0 = this.clusters.get(curr);
-			    	Iterator<Integer> it = c.iterator();
-			    	while (it.hasNext()) {
-			    		Integer k = it.next();
-			    		c0.add(k);
-			    	    it.remove();
-			    	}
-			    }
-			    i++;
-			}	
-			if (!s) {
-				HashSet<Integer> hs = new HashSet<Integer>();
-				hs.add(start);
-				hs.add(goal);
-				this.clusters.add(hs);
-			}
-		}
-		for(int i = this.clusters.size()-1; i >= 0; i--) {
-			if(this.clusters.get(i).isEmpty()) {
-				this.clusters.remove(i);
-			}
-		}
-	}
 	
 	/** Reconstruct the path
 	 * 
@@ -325,7 +286,7 @@ public class CapGraph implements Graph {
 		path.addFirst(start);
 		return path;
 	}
-
+	
 	/**
 	 * Print the LinkedList to the screen.
 	 */
@@ -372,11 +333,13 @@ public class CapGraph implements Graph {
 		    		    	continue;
 		    		    }
 		    		    GraphEdge ed;
+		    		    // we get the edge with increased vertexes
 		    		    if(temp < e) {
 		    		    	ed = this.getVertex(temp).getEdge(e);
 		    		    } else {
 		    		    	ed = this.getVertex(e).getEdge(temp);
 		    		    }
+		    		    // if edge exists
 		    		    if(ed != null) {
 		    		    	if(!queue.contains(ed)) {
 		    		    		ed.setWeight(0);
@@ -399,13 +362,14 @@ public class CapGraph implements Graph {
 	
 	/**
 	 * Cut edge.
-	 * @param int k.
+	 * @param int k How many edges do we have to remove? k.
+	 * @param int w This is the min weight of edge to remove.
 	 */	
 	public void cutEdge(int k, int w) {
 		int i = 0;
 		List<GraphEdge> queue = this.getStraightPaths();
-		while (!this.getMulticlustering() && (k > i)) {
-			while (!queue.isEmpty()) {	
+		while (!this.getMulticlustering() && (k > i) && (!queue.isEmpty())) {
+//			if (!queue.isEmpty()) {	
 				GraphEdge curr = queue.remove(0);
 				GraphNode from = curr.getFrom();
 				GraphNode to = curr.getTo();
@@ -414,9 +378,9 @@ public class CapGraph implements Graph {
 				numEdges--;
 				numEdges--;
 				if(curr.getWeight() < w) {
-					break;
+//					break;
 				}
-			}
+//			}
 			queue = this.getStraightPaths();
 			i++;
 		}
@@ -430,6 +394,45 @@ public class CapGraph implements Graph {
 			}	
 		}
 	}	
+	
+	private void checkClusters(List<GraphEdge> list) {
+		this.clusters = new ArrayList<HashSet<Integer>>();
+		for(GraphEdge e: list) {
+			int start = e.getFrom().getPoint();
+			int goal = e.getTo().getPoint();
+			boolean s = false;
+			int curr = 0;
+			int i = 0;
+			for (HashSet<Integer> c : this.clusters) {
+			    if((c.contains(start) || c.contains(goal) && !s)) {
+			    	c.add(start);
+			    	c.add(goal);			    	
+			    	s = true;
+			    	curr = i;
+			    } else if((c.contains(start) || c.contains(goal) && s))  {
+			    	HashSet<Integer> c0 = this.clusters.get(curr);
+			    	Iterator<Integer> it = c.iterator();
+			    	while (it.hasNext()) {
+			    		Integer k = it.next();
+			    		c0.add(k);
+			    	    it.remove();
+			    	}
+			    }
+			    i++;
+			}	
+			if (!s) {
+				HashSet<Integer> hs = new HashSet<Integer>();
+				hs.add(start);
+				hs.add(goal);
+				this.clusters.add(hs);
+			}
+		}
+		for(int i = this.clusters.size()-1; i >= 0; i--) {
+			if(this.clusters.get(i).isEmpty()) {
+				this.clusters.remove(i);
+			}
+		}
+	}
 	
 	/**
 	 * Report expected number of edges
@@ -447,7 +450,7 @@ public class CapGraph implements Graph {
 	
 	public static void main(String[] args) {
 		String file = "facebook_1000.txt";
-		//String file = "small_test_graph2.txt";
+		//String file = "dij/test_4.txt";
 		CapGraph graph = new CapGraph();		
 		
 		GraphLoader.loadGraph(graph, "data/" + file);

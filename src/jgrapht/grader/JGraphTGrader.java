@@ -6,21 +6,26 @@
  */
 package jgrapht.grader;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import org.jgrapht.Graph;
 import org.jgrapht.alg.clustering.GirvanNewmanClustering;
+import org.jgrapht.alg.clustering.KSpanningTreeClustering;
+import org.jgrapht.alg.clustering.LabelPropagationClustering;
 import org.jgrapht.alg.interfaces.ClusteringAlgorithm.Clustering;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
-import graph.grader.CorrectAnswer;
+import jgrapht.grader.CorrectAnswer;
 import graph.grader.Grader;
 import util.GraphTLoader;
 
 public class JGraphTGrader extends graph.grader.Grader {
-    private static final int TESTS = 8;
+    private static final int TESTS = 16;
 
     public static void main(String[] args) {
         Grader grader = new JGraphTGrader();
@@ -37,6 +42,7 @@ public class JGraphTGrader extends graph.grader.Grader {
                 break;
             }
         }
+        //boolean infinite = false;
         if (grader.correct < TESTS) {
         	grader.feedback = "Some tests failed. Please check the following and try again:\nFailed tests will display the first mismatched lines of the output.\n" + grader.feedback;
         } else {
@@ -90,6 +96,10 @@ public class JGraphTGrader extends graph.grader.Grader {
         
         corr = new CorrectAnswer("data/jgrapht_answers/gn_" + i + ".txt");
         judgeGirvanNewman(i, graph, corr, k);
+        corr = new CorrectAnswer("data/jgrapht_answers/st_" + i + ".txt");
+        judgeKSpanningTree(i, graph, corr, k);
+        corr = new CorrectAnswer("data/jgrapht_answers/lp_" + i + ".txt");
+        judgeLabelPropagation(i, graph, corr, k);
     }
     
     /** Compare the user's result with the right answer.
@@ -104,9 +114,11 @@ public class JGraphTGrader extends graph.grader.Grader {
         // Prints the shortest path from vertex "start" to vertex "end". 
         feedback += appendFeedback(i, "Running JGraphT's DijkstraShortestPath algorithm from (" + start + ") to (" + end + ")");
         DijkstraShortestPath<Integer, DefaultEdge> dijkstraShortestPath = new DijkstraShortestPath<>(graph);
-        List<Integer> path = dijkstraShortestPath.getPath(start,end).getVertexList();
-        System.out.println(path + "\n");
-
+        List<Integer> list = dijkstraShortestPath.getPath(start,end).getVertexList();
+        //System.out.println(list + "\n");
+        List<Integer> si = new ArrayList<Integer>(list);
+        List<List<Integer>> path = new ArrayList<List<Integer>>();
+        path.add(si);
     	printResult(path, corr);
     }
     
@@ -117,11 +129,9 @@ public class JGraphTGrader extends graph.grader.Grader {
      * @param k The number of clusters 
      */
     public void judgeGirvanNewman(int i, Graph<Integer, DefaultEdge> graph, CorrectAnswer corr, Integer k) {
+    	
         // Correct if paths are same length and have the same elements 
         feedback += appendFeedback(i, "Running JGraphT's GirvanNewmanClusterin algorithm for k = " + k);
-        DijkstraShortestPath<Integer, DefaultEdge> dijkstraShortestPath = new DijkstraShortestPath<>(graph);
-        List<Integer> path = dijkstraShortestPath.getPath(2,6).getVertexList();
-        System.out.println(path + "\n");
 
 		/*
          * GirvanNewmanClustering​(Graph<V,​E> graph,
@@ -132,13 +142,78 @@ public class JGraphTGrader extends graph.grader.Grader {
          * k - the desired number of clusters
          * */
         Clustering<Integer> c1 = new GirvanNewmanClustering<>(graph, k).getClustering();
-        System.out.println(c1 + "\n");
+        List<List<Integer>> path = new ArrayList<List<Integer>>();
+        for (Set<Integer> element : c1) {
+        	path.add(new ArrayList<Integer>(element));
+        }
+        //System.out.println(c1 + "\n");
+    		
+    	printResult(path, corr);
+    }
+    
+    /** Compare the user's result with the right answer.
+     * @param i The graph number
+     * @param graph The user's graph
+     * @param corr The correct answer
+     * @param k The number of clusters 
+     */
+    public void judgeKSpanningTree(int i, Graph<Integer, DefaultEdge> graph, CorrectAnswer corr, Integer k) {
+    	
+        // Correct if paths are same length and have the same elements 
+        feedback += appendFeedback(i, "Running JGraphT's KSpanningTreeClusterin algorithm for k = " + k);
+
+        /*
+         * KSpanningTreeClustering​(Graph<V,​E> graph,
+         *                     int k)
+         * Create a new clustering algorithm.
+         * Parameters:
+         * graph - the graph (needs to be undirected)
+         * k - the desired number of clusters
+         * */
+        KSpanningTreeClustering<Integer, DefaultEdge> alg = new KSpanningTreeClustering<>(graph, k);
+        Clustering<Integer> c1 = alg.getClustering();
+        List<List<Integer>> path = new ArrayList<List<Integer>>();
+        for (Set<Integer> element : c1) {
+        	path.add(new ArrayList<Integer>(element));
+        }
+        //System.out.println(c1 + "\n");
+    		
+    	printResult(path, corr);
+    }    
+    /** Compare the user's result with the right answer.
+     * @param i The graph number
+     * @param graph The user's graph
+     * @param corr The correct answer
+     * @param k The number of clusters 
+     */
+    public void judgeLabelPropagation(int i, Graph<Integer, DefaultEdge> graph, CorrectAnswer corr, Integer k) {
+    	
+        // Correct if paths are same length and have the same elements 
+        feedback += appendFeedback(i, "Running JGraphT's LabelPropagationClusterin algorithm for k = " + k);
+
+        /*
+         * LabelPropagationClustering​(Graph<V,​E> graph,
+         *                        int maxIterations,
+         *                        java.util.Random rng)
+         * Create a new clustering algorithm.
+         * Parameters:
+         * graph - the graph (needs to be undirected)
+         * maxIterations - maximum number of iterations (zero means no limit)
+         * rng - random number generator
+         * */
+        LabelPropagationClustering<Integer, DefaultEdge> alg = new LabelPropagationClustering<>(graph, 0, new Random(13));
+        Clustering<Integer> c1 = alg.getClustering();
+        List<List<Integer>> path = new ArrayList<List<Integer>>();
+        for (Set<Integer> element : c1) {
+        	path.add(new ArrayList<Integer>(element));
+        }
+        //System.out.println(c1 + "\n");
     		
     	printResult(path, corr);
     }
     
     /** Print a search path in readable form */
-    public void printResult(List<Integer> path, CorrectAnswer corr) {
+    public void printResult(List<List<Integer>> path, CorrectAnswer corr) {
         if (path == null) {
             if (corr.path == null) {
                 feedback += "PASSED.";
@@ -146,7 +221,7 @@ public class JGraphTGrader extends graph.grader.Grader {
             } else {
                 feedback += "FAILED. Your implementation returned null; expected \n" + printPath(corr.path) + ".";
             }
-        } else if (path.size() != corr.path.size() || !corr.path.containsAll(path)) {
+        } else if (path.size() != corr.path.size() || !corr.path.equals(path)) {
             feedback += "FAILED. Expected: \n" + printPath(corr.path) + "Got: \n" + printPath(path);
             if (path.size() != corr.path.size()) {
                 feedback += "Your result has size " + path.size() + "; expected " + corr.path.size() + ".";
@@ -160,10 +235,13 @@ public class JGraphTGrader extends graph.grader.Grader {
     }    
     
     /** Print a search path in readable form */
-    public String printPath(List<Integer> path) {
+    public String printPath(List<List<Integer>> path) {
         String ret = "";
-        for (Integer point : path) {
-            ret += point + "\n";
+        for (List<Integer> element : path) {
+            for (Integer point : element) {
+                ret += point + " ";
+            }
+            ret += "\n";
         }
         return ret;
     }

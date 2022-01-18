@@ -50,10 +50,10 @@ public class DijkstraGrader extends Grader {
         correct = 0;
 
         try {
-            runTest(1, "small_test_graph1.txt", "Small test graph 1", 2, 6);
-            runTest(2, "small_test_graph1.txt", "Small test graph 1(2)", 4, 7);
-            runTest(3, "small_test_graph2.txt", "Small test graph 2", 2, 6);
-            runTest(4, "small_test_graph2.txt", "Small test graph 2(2)", 5, 8);
+            runTest(1, "dij/test_1.txt", "Small test graph 1", 2, 6);
+            runTest(2, "dij/test_2.txt", "Small test graph 2", 2, 9);
+            runTest(3, "dij/test_3.txt", "Small test graph 3", 1, 14);
+            runTest(4, "dij/test_4.txt", "Small test graph 4", 4, 11);
 
             if (correct == TESTS)
                 feedback = "All tests passed. Great job!" + feedback;

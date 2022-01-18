@@ -34,8 +34,6 @@ public class TestJGraphT  {
 
     private static final Dimension DEFAULT_SIZE = new Dimension(800, 600);
 
-    //private JGraphXAdapter<Integer, DefaultEdge> jgxAdapter;
-
     /**
      * Main demo entry point.
      * 
@@ -84,7 +82,7 @@ public class TestJGraphT  {
 	         * graph - the graph
 	         * k - the desired number of clusters
 	         * */
-	        int k = 2;
+	        int k = 4;
 	        Clustering<Integer> c1 = new GirvanNewmanClustering<>(graph, k).getClustering();
 	        System.out.println(c1 + "\n");
 	        
@@ -96,9 +94,9 @@ public class TestJGraphT  {
 	         * graph - the graph (needs to be undirected)
 	         * k - the desired number of clusters
 	         * */
-	        /*KSpanningTreeClustering<Integer, DefaultEdge> alg1 = new KSpanningTreeClustering<>(graph, k);
+	        KSpanningTreeClustering<Integer, DefaultEdge> alg1 = new KSpanningTreeClustering<>(graph, k);
 	        Clustering<Integer> c2 = alg1.getClustering();
-	        System.out.println(c2 + "\n");*/
+	        System.out.println(c2 + "\n");
 	        
 	        /*
 	         * LabelPropagationClustering​(Graph<V,​E> graph,

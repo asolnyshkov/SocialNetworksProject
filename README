@@ -27,7 +27,7 @@ The main question is the clustering of our data.
 4. Algorithms, Data Structures, and Answer to my Question
 First I implemented a graph clustering algorithm using the JgraphT library. I used SimpleGraph from this library, loaded the data from a file there, and then I used the GirvanNewmanClustering, KspanningTreeClustering and LabelPropagationClustering methods to cluster the data.
 
-Than I used the betweenness calculation algorithm at the initial stage of the main clustering algorithm. Mia talked about it.
+Than I used the betweenness calculation algorithm at the initial stage of the main clustering algorithm. 
 Basic algorithm:
 - Compute betweenness of all edges
 - for each node v 
