@@ -45,7 +45,7 @@ public class TestJGraphT  {
         Graph<Integer, DefaultEdge> graph =
                 new SimpleGraph<Integer, DefaultEdge>(DefaultEdge.class);
         //GraphTLoader.loadGraph(graph, "data/jgrapht/test_3.txt");
-        GraphTLoader.loadGraph(graph, "data/jgrapht/test_4.txt");
+        GraphTLoader.loadGraph(graph, "data/jgrapht/test_3.txt");
         if (graph.vertexSet().size() > 0) {
 	        // create a visualization using JGraph, via an adapter
         	JGraphXAdapter<Integer, DefaultEdge> jgxAdapter = new JGraphXAdapter<>(graph);

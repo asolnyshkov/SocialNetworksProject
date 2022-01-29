@@ -22,7 +22,7 @@ public class GraphEdge {
 		this.from = f;
 		this.to = t;
 		this.length = 0;
-		this.weight = 0;
+		this.weight = 1;
 	}
 
 	/**
