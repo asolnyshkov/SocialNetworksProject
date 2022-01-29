@@ -26,6 +26,7 @@ public class CapGraph implements Graph {
 	private HashMap<Integer, GraphNode> vertexMap;
 	private boolean multiclustering;
 	private List <HashSet<Integer>> clusters;
+	private HashSet<CommunityNode> communitySet;
 	
 	/**
 	 * Create a new empty CapGraph
@@ -37,6 +38,7 @@ public class CapGraph implements Graph {
 
 		multiclustering = false;
 		clusters = new ArrayList<HashSet<Integer>>();
+		communitySet = new HashSet<CommunityNode>();
 	}
 
 	/**
@@ -373,8 +375,7 @@ public class CapGraph implements Graph {
 				GraphEdge curr = queue.remove(0);
 				GraphNode from = curr.getFrom();
 				GraphNode to = curr.getTo();
-				from.removeEdge(to);
-				to.removeEdge(from);
+				from.removeTwoEdges(to);
 				numEdges--;
 				numEdges--;
 				if(curr.getWeight() < w) {
@@ -448,14 +449,200 @@ public class CapGraph implements Graph {
 		return start.getVertexDegree() * end.getVertexDegree()/(2 * this.getNumEdges());
 	}
 	
+	/** 
+	 * We assign a different community 
+	 * to each node of the network.  
+	 */
+	public void assignCommunityToEachNode() {
+		if (this.communitySet.size() == 0) {
+			for(GraphNode g : vertexMap.values()) {
+				CommunityNode cn = new CommunityNode(g.getPoint());
+				cn.addNode(g);
+
+				communitySet.add(cn);
+			}
+		}
+	}
+
+	/** 
+	 * For each node i we consider 
+	 * the neighbors j of i and 
+	 * we evaluate the gain of modularity.  
+	 */
+	public void evaluateTheGainOfModularity() {
+		int m = getNumEdges();
+		HashSet<Integer> visited = new HashSet<Integer>();
+		HashSet<CommunityNode> addMap = new HashSet<CommunityNode>();		
+
+		for(CommunityNode cn : communitySet) {
+			double maxMod = -1;
+			GraphNode maxModNode = null;
+			
+			for(GraphNode gn : cn.getNodes()) {
+				visited.add(gn.getPoint());
+				for(GraphNode nb : gn.getNeighbors()) {
+					if (!visited.contains(nb.getPoint())) {
+						double deltaMod = cn.deltaModularity(m, nb);
+						if(deltaMod > 0 && deltaMod > maxMod) {
+							maxMod = deltaMod;
+							maxModNode = nb;
+						}
+					}
+					//e.modularity(m, i);
+				}
+			}
+			
+			if(maxModNode != null) {
+				CommunityNode nbcn = maxModNode.getCommunity();
+				
+				CommunityNode newCn = nbcn.deleteNode(maxModNode);
+				
+				addMap.add(newCn);
+				cn.addNode(maxModNode);
+				visited.add(maxModNode.getPoint());
+			}
+			//System.out.println(cn.getNodesPoints().toString());
+
+		}
+		communitySet.addAll(addMap);
+		deleteEmptyCommunities();
+	}
+	
+	public void deleteEmptyCommunities() {
+		HashSet<CommunityNode> emptyCommunity = new HashSet<CommunityNode>();
+		for(CommunityNode cn : communitySet) {
+			if(cn.getNodesPoints().size()==0) {
+				emptyCommunity.add(cn);
+			}
+		}
+		for(CommunityNode cn : emptyCommunity) {
+			communitySet.remove(cn);
+		}
+	}
+
+	/**	 
+	 * The aij represents the weight of the edge between i and j.
+	 * @param vertex i. 
+	 * @param vertex j. 
+	 * @return aij.
+	 */
+
+	public int getAij(GraphNode i, GraphNode j) {
+		if(i.getNeighborPoints().contains(j.getPoint())) {
+			return 1;
+		} 
+		return 0;
+	}
+	
+	/**	 
+	 * Delta is the function δ(u, v) is 1 if u = v and 0 otherwise.
+	 * @param community ci. 
+	 * @param community cj. 
+	 * @return delta.
+	 */	
+	public int getDelta(CommunityNode ci, CommunityNode cj) {
+		if(ci.equals(cj)) {
+			return 0;
+		}
+		return 1;
+	}
+	
+	/**
+	 * The modularity of a partition is a scalar value between −1 and 1
+	 * that measures the density of links inside communities 
+	 * as compared to links between communities.
+	 * 
+	 * m is the sum of the weights of all the links in the network.	 
+	 * aij represents the weight of the edge between i and j.
+	 * ki is the sum of the weights of the edges attached to vertex i. 
+	 * kj is the sum of the weights of the edges attached to vertex j. 
+	 * delta is the function δ(u, v) is 1 if u = v and 0 otherwise.
+	 * ci is the community to which vertex i is assigned. 
+	 * cj is the community to which vertex j is assigned. 
+	 */
+	public double modularity() {
+		int m = getNumEdges();		
+		double mod = 0;
+		for(GraphNode i : vertexMap.values()) {
+			for(GraphNode j : vertexMap.values()) {
+				CommunityNode ci = i.getCommunity();
+				CommunityNode cj = j.getCommunity();				
+
+				int ki = i.getVertexDegree();
+				int kj = j.getVertexDegree();
+				double temp = (getAij(i, j) - ki*kj/(2*m)) * getDelta(ci, cj);
+		        //System.out.println("modularity =" + temp + " i=" + i.getPoint() + " j=" + j.getPoint());
+				mod += temp;
+			}
+		}
+		return mod/(2*m);
+	}
+	
+	public String toString() {
+		String s = "";
+		int i = 1;
+		for(CommunityNode cn : communitySet) {
+			s += "CN" + i + " " + cn.toString() + "\n";
+			i++;
+		}
+		return s;
+	}
+	
+	public int getAllLinks() {
+		HashSet<GraphEdge> internalLinksSet = new HashSet<GraphEdge>();
+		HashSet<GraphEdge> externalLinksSet = new HashSet<GraphEdge>();
+		for(CommunityNode cn : communitySet) {
+			internalLinksSet.addAll(cn.getInternalEdges());
+			externalLinksSet.addAll(cn.getExternalEdges());	
+		}
+		return internalLinksSet.size() + externalLinksSet.size()/2;
+	}
+	public void communityAggregation() {
+		for(CommunityNode cn : communitySet) {
+			GraphNode node = new GraphNode(cn.getPoint());
+			cn.setSingleNode(node);
+		}
+		
+		HashMap<Integer, GraphNode> vm = new HashMap<Integer, GraphNode>();
+		
+		for(CommunityNode cn : communitySet) {
+			GraphNode snode = cn.communityAggregation();
+			vm.put(cn.getPoint(), snode);
+		}
+		for(CommunityNode cn : communitySet) {
+			GraphNode node = cn.getSingleNode();
+			HashMap<Integer, GraphNode> nm = new HashMap<Integer, GraphNode>();
+			nm.put(node.getPoint(), node);
+			cn.setNodes(nm);
+		}
+		vertexMap = new HashMap<Integer, GraphNode>(vm);
+	}
+	
 	public static void main(String[] args) {
-		String file = "facebook_1000.txt";
-		//String file = "dij/test_4.txt";
+		//String file = "facebook_1000.txt";
+		String file = "dij/test_1.txt";
 		CapGraph graph = new CapGraph();		
 		
 		GraphLoader.loadGraph(graph, "data/" + file);
 	    
-		graph.cutEdge(1, 60000);
+		//graph.cutEdge(1, 60000);
+		graph.assignCommunityToEachNode();
+		int k = 2;
+		int size = graph.communitySet.size();
+		while(size > k) {
+			graph.evaluateTheGainOfModularity();
+			int temp = graph.communitySet.size();
+			if(temp == size) {
+				break;
+			}
+			size = temp;
+			graph.communityAggregation();
+		}
+		//double mod = graph.modularity();
+        //System.out.println("modularity = " + mod);
+		System.out.println(graph.toString());
+
+		System.out.println("size=" + size + " edges=" + graph.getNumEdges() + " sum_edges=" + graph.getAllLinks());
 	}
 
 }

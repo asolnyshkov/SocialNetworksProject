@@ -13,7 +13,9 @@ import java.util.HashSet;
 public class GraphNode {
 	private int point;
 	private HashMap<Integer, GraphEdge> edgesMap;
+	private HashMap<Integer, GraphNode> neighborsMap;
 	private Double distance;
+	private CommunityNode community;
 
 	static final double DEFAULT_DISTANCE = Double.POSITIVE_INFINITY;
 	
@@ -24,9 +26,11 @@ public class GraphNode {
 	public GraphNode(int p) {
 		this.setPoint(p);
 		this.edgesMap = new HashMap<Integer, GraphEdge>();
+		this.neighborsMap = new HashMap<Integer, GraphNode>();
 		this.distance = DEFAULT_DISTANCE;
+		this.community = null;
 	}
-	
+
 	/**
 	 * Get the point
 	 * @return The point of the node. 	 
@@ -44,21 +48,34 @@ public class GraphNode {
 	}
 
 	/**
+	 * Report neighbor points of the vertex
+	 * @return The neighbor points of the vertex in the graph.
+	 */	
+	public HashSet<Integer> getNeighborPoints() {
+		return new HashSet<Integer>(edgesMap.keySet());
+	}
+	
+	/**
 	 * Report neighbors of the vertex
 	 * @return The neighbors of the vertex in the graph.
 	 */	
-	public HashSet<Integer> getNeighborPoints() {
-		HashSet<Integer> vs = new HashSet<Integer>(edgesMap.keySet());
-		return vs;
+	public HashSet<GraphNode> getNeighbors() {		
+		return new HashSet<GraphNode>(neighborsMap.values());
 	}
 	
 	/**
 	 * Add the edge to neighbor from the current node
 	 * @param end node for the edge.
 	 */	
-	protected void addEdge(GraphNode neighbor) 	{
-		GraphEdge e = new GraphEdge(this, neighbor);
-		edgesMap.put(neighbor.getPoint(), e);
+	protected GraphEdge addEdge(GraphNode neighbor) 	{
+		GraphEdge e = this.getEdge(neighbor.getPoint());
+		if(e == null) {
+			e = new GraphEdge(this, neighbor);
+
+			edgesMap.put(neighbor.getPoint(), e);
+			neighborsMap.put(neighbor.getPoint(), neighbor);
+		}
+		return e;
 	}
 	
 	/**
@@ -67,19 +84,25 @@ public class GraphNode {
 	 */	
 	protected void removeEdge(GraphNode neighbor) 	{
 		edgesMap.remove(neighbor.getPoint());
+		neighborsMap.remove(neighbor.getPoint());
+	}
+	
+	protected void removeTwoEdges(GraphNode neighbor) 	{
+		removeEdge(neighbor);
+		neighbor.removeEdge(this);
 	}	
 	/** Find the edges of the current node
 	 * 
 	 * @return The list of edges 
 	 */
 	protected HashSet<GraphEdge> getEdges() {
-		HashSet<GraphEdge> ed = new HashSet<GraphEdge>(edgesMap.values());
-		return ed;
+		return new HashSet<GraphEdge>(edgesMap.values());	
 	}
 	
 	/**
-	 * Vertex neighborhood check.
-	 * @return 1 if true or 0 if false. 	 
+	 * Get GraphEdge.
+	 * @param point GraphNode to.
+	 * @return GraphEdge. 	 
 	 */	
 	public GraphEdge getEdge(int point) {
 		if(edgesMap.containsKey(point)) {
@@ -87,7 +110,15 @@ public class GraphNode {
 		} else {
 			return null;
 		}
-	}	
+	}
+	public GraphEdge getEdgeObject(GraphNode neighbor) {
+		for(GraphEdge edge : edgesMap.values()) {
+			if(edge.getTo().equals(neighbor)) {
+				return edge;
+			} 
+		}
+		return null;
+	}
 	/**
 	 * Vertex neighborhood check.
 	 * @return 1 if true or 0 if false. 	 
@@ -99,7 +130,20 @@ public class GraphNode {
 			return 0;
 		}
 	}
-	
+	/**
+	 * Get the point
+	 * @return The point of the node. 	 
+	 */	
+	public CommunityNode getCommunity() {
+		return community;
+	}	
+	/**
+	 * Get the point
+	 * @return The point of the node. 	 
+	 */	
+	public void setCommunity(CommunityNode c) {
+		community = c;
+	}	
 	/**
 	 * Report degree of vertex
 	 * between two edges
