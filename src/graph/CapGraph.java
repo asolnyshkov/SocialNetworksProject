@@ -107,6 +107,20 @@ public class CapGraph implements Graph {
 	}
 	
 	/**
+	 * Report of the sum of the weights of all the links in the network.
+	 * @return The sum of the weights of all the links in the network.
+	 */	
+	public int getEdgesWeight() {
+		int weight = 0;
+		for(GraphNode n : vertexMap.values()) {
+			for(GraphEdge g : n.getEdges()) {
+				weight += g.getWeight();
+			}
+		}
+		return weight/2;
+	}
+	
+	/**
 	 * Report flag of multiclustering
 	 * @return The flag of multiclustering.
 	 */	
@@ -456,8 +470,7 @@ public class CapGraph implements Graph {
 		if (this.communitySet.size() == 0) {
 			for(GraphNode g : vertexMap.values()) {
 				CommunityNode cn = new CommunityNode(g.getPoint());
-				cn.addNode(g);
-
+				cn.addNodeFirst(g);
 				communitySet.add(cn);
 			}
 		}
@@ -469,7 +482,7 @@ public class CapGraph implements Graph {
 	 * we evaluate the gain of modularity.  
 	 */
 	public void evaluateTheGainOfModularity() {
-		int m = getNumEdges();
+		int m = getEdgesWeight();
 		HashSet<Integer> visited = new HashSet<Integer>();
 		HashSet<CommunityNode> addMap = new HashSet<CommunityNode>();		
 
@@ -482,7 +495,7 @@ public class CapGraph implements Graph {
 				for(GraphNode nb : gn.getNeighbors()) {
 					if (!visited.contains(nb.getPoint())) {
 						double deltaMod = cn.deltaModularity(m, nb);
-						if(deltaMod > 0 && deltaMod > maxMod) {
+						if((deltaMod > 0) && (deltaMod > maxMod)) {
 							maxMod = deltaMod;
 							maxModNode = nb;
 						}
@@ -498,7 +511,7 @@ public class CapGraph implements Graph {
 				
 				addMap.add(newCn);
 				cn.addNode(maxModNode);
-				//addMap.add(nbcn);
+
 				visited.add(maxModNode.getPoint());
 			}
 			//System.out.println(cn.getNodesPoints().toString());
@@ -605,13 +618,15 @@ public class CapGraph implements Graph {
 		for(GraphEdge e : externalLinksSet) {
 			extWeight += e.getWeight();
 		}
-		return intWeight + extWeight/2;
+		return intWeight/2 + extWeight/2;
 	}
 	
 	
 	public void communityAggregation() {
 		for(CommunityNode cn : communitySet) {
 			GraphNode node = new GraphNode(cn.getPoint());
+			node.setCommunity(cn);
+			node.setAllNodesSet(cn.getAllNodesSet());
 			cn.setSingleNode(node);
 		}
 		
@@ -641,6 +656,7 @@ public class CapGraph implements Graph {
 		graph.assignCommunityToEachNode();
 		int k = 2;
 		int size = graph.communitySet.size();
+		int i = 1;
 		while(size > k) {
 			while(size > k) {
 				graph.evaluateTheGainOfModularity();
@@ -652,16 +668,16 @@ public class CapGraph implements Graph {
 			}
 			double mod = graph.modularity();
 			System.out.println(graph.toString());
-			System.out.println("size=" + size + " edges=" + graph.getNumEdges() 
+			System.out.println("Gain" + i +" size=" + size + " edges=" + graph.getNumEdges() 
 				+ " sum_edges=" + graph.getAllLinks()+ " modularity=" + mod + "\n");
-			
+
 			graph.communityAggregation();
 			
 			mod = graph.modularity();
 			System.out.println(graph.toString());
-			System.out.println("size=" + size + " edges=" + graph.getNumEdges() 
+			System.out.println("Aggr" + i +" size=" + size + " edges=" + graph.getNumEdges() 
 				+ " sum_edges=" + graph.getAllLinks()+ " modularity=" + mod + "\n");
-
+			i++;
 		}
 	}
 

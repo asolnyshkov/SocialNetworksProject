@@ -81,6 +81,6 @@ public class GraphEdge {
 	}
 	
 	public String toString() {
-		return "(" + from.getPoint() + ", " + to.getPoint() + ")";
+		return "(" + from.getPoint() + ", " + to.getPoint() + ")/" + weight + " ";
 	}
 }

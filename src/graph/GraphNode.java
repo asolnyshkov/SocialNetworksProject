@@ -16,6 +16,7 @@ public class GraphNode {
 	private HashMap<Integer, GraphNode> neighborsMap;
 	private Double distance;
 	private CommunityNode community;
+	private HashSet<Integer> allNodesSet;
 
 	static final double DEFAULT_DISTANCE = Double.POSITIVE_INFINITY;
 	
@@ -29,6 +30,7 @@ public class GraphNode {
 		this.neighborsMap = new HashMap<Integer, GraphNode>();
 		this.distance = DEFAULT_DISTANCE;
 		this.community = null;
+		this.allNodesSet = new HashSet<Integer>();
 	}
 
 	/**
@@ -46,7 +48,15 @@ public class GraphNode {
 	public void setPoint(int point) {
 		this.point = point;
 	}
-
+	
+	public HashSet<Integer> getAllNodesSet() {
+		return new HashSet<Integer>(allNodesSet);
+	}
+	
+	public void setAllNodesSet(HashSet<Integer> anm) {
+		allNodesSet = anm;
+	}
+	
 	/**
 	 * Report neighbor points of the vertex
 	 * @return The neighbor points of the vertex in the graph.
@@ -151,7 +161,11 @@ public class GraphNode {
 	 * @return The degree of vertex.
 	 */	
 	public int getVertexDegree() {
-		return edgesMap.size();
+		int weight = 0;
+		for(GraphEdge g : getEdges()) {
+			weight += g.getWeight();
+		}
+		return weight;
 	}
 	
 	/** Get the weight of current node on the path to the goal.
@@ -189,5 +203,23 @@ public class GraphNode {
 		distance = DEFAULT_DISTANCE;
 	}
 	
-
+	public String toString() {
+		String s = "[" + this.point + "]";
+		s += " [";
+		for(GraphNode n : getNeighbors()) {
+			s += n.getPoint() + " ";
+		}
+		s = s.trim() + "]";
+		s += " {";
+		for(GraphEdge g : getEdges()) {
+			s += g.toString();
+		}
+		s = s.trim() + "]";
+		s += " (";
+		for(Integer n : getAllNodesSet()) {
+			s += n + " ";
+		}
+		s = s.trim() + ")";
+		return s;
+	}
 }
