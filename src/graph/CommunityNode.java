@@ -71,8 +71,8 @@ public class CommunityNode {
 	 */	
 	public void addNode(GraphNode node) {
 		nodesMap.put(node.getPoint(), node);
+		getAllNodesSet().addAll(node.getAllNodesSet());
 		node.setCommunity(this);
-		allNodesSet.add(node.getPoint());
 		for(GraphEdge e: node.getEdges()) {
 			GraphNode nb = e.getTo();
 			GraphEdge back = nb.getEdgeObject(node);
@@ -105,7 +105,8 @@ public class CommunityNode {
 		nodesMap.remove(node.getPoint());
 		CommunityNode cn = new CommunityNode(node.getPoint());
 		node.setCommunity(cn);
-		allNodesSet.remove(node.getPoint());		
+		getAllNodesSet().remove(node.getPoint());
+		cn.getAllNodesSet().add(node.getPoint());
 		for(GraphEdge e: node.getEdges()) {
 			if(getInternalEdges().contains(e)) {
 				getInternalEdges().remove(e);
@@ -141,7 +142,7 @@ public class CommunityNode {
 	}
 	
 	public HashSet<Integer> getAllNodesSet() {
-		return new HashSet<Integer>(allNodesSet);
+		return allNodesSet;
 	}
 	
 	public void setAllNodesSet(HashSet<Integer> anm) {
@@ -215,8 +216,6 @@ public class CommunityNode {
 	
 	public GraphNode communityAggregation() {
 		GraphNode node = this.getSingleNode();
-		allNodesSet.addAll(nodesMap.keySet());
-		node.setAllNodesSet(getAllNodesSet());
 		HashSet<GraphEdge> intEdges = new HashSet<GraphEdge>();
 		HashSet<GraphEdge> extEdges = new HashSet<GraphEdge>();
 
@@ -229,6 +228,7 @@ public class CommunityNode {
 						intEdge.setWeight(intEdge.getWeight() + e.getWeight());
 					} else {
 						intEdge = node.addEdge(node);
+						intEdge.setWeight(e.getWeight());
 						intEdges.add(intEdge);
 					}	
 				} else if(getExternalEdges().contains(e)) {
@@ -240,6 +240,7 @@ public class CommunityNode {
 						extEdge.setWeight(extEdge.getWeight() + e.getWeight());
 					} else {
 						extEdge = node.addEdge(neighborNode);
+						extEdge.setWeight(e.getWeight());
 						extEdges.add(extEdge);
 					}					
 				}
@@ -253,12 +254,12 @@ public class CommunityNode {
 	}
 	
 	public String toString() {
-		String s = "[";
+		String s = "C" + getPoint() + " [";
 		for(Integer g : nodesMap.keySet()) {
 			s += g + " ";
 		}
 		s = s.trim() + "]";
-		s += " nodes=[";
+		s += " allnodes=[";
 		for(Integer g : allNodesSet) {
 			s += g + " ";
 		}

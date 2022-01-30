@@ -31,6 +31,7 @@ public class GraphNode {
 		this.distance = DEFAULT_DISTANCE;
 		this.community = null;
 		this.allNodesSet = new HashSet<Integer>();
+		allNodesSet.add(p);
 	}
 
 	/**
@@ -50,7 +51,7 @@ public class GraphNode {
 	}
 	
 	public HashSet<Integer> getAllNodesSet() {
-		return new HashSet<Integer>(allNodesSet);
+		return allNodesSet;
 	}
 	
 	public void setAllNodesSet(HashSet<Integer> anm) {
@@ -204,10 +205,14 @@ public class GraphNode {
 	}
 	
 	public String toString() {
-		String s = "[" + this.point + "]";
-		s += " [";
+		String s = "N" + getPoint() + " nbrs=[";
 		for(GraphNode n : getNeighbors()) {
 			s += n.getPoint() + " ";
+		}
+		s = s.trim() + "]";
+		s += " allnodes=[";
+		for(Integer n : getAllNodesSet()) {
+			s += n + " ";
 		}
 		s = s.trim() + "]";
 		s += " {";
@@ -215,11 +220,7 @@ public class GraphNode {
 			s += g.toString();
 		}
 		s = s.trim() + "]";
-		s += " (";
-		for(Integer n : getAllNodesSet()) {
-			s += n + " ";
-		}
-		s = s.trim() + ")";
+
 		return s;
 	}
 }

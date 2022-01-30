@@ -472,6 +472,7 @@ public class CapGraph implements Graph {
 				CommunityNode cn = new CommunityNode(g.getPoint());
 				cn.addNodeFirst(g);
 				communitySet.add(cn);
+				
 			}
 		}
 	}
@@ -626,7 +627,7 @@ public class CapGraph implements Graph {
 		for(CommunityNode cn : communitySet) {
 			GraphNode node = new GraphNode(cn.getPoint());
 			node.setCommunity(cn);
-			node.setAllNodesSet(cn.getAllNodesSet());
+			node.getAllNodesSet().addAll(cn.getAllNodesSet());
 			cn.setSingleNode(node);
 		}
 		
@@ -644,10 +645,52 @@ public class CapGraph implements Graph {
 		}
 		vertexMap = new HashMap<Integer, GraphNode>(vm);
 	}
+
+	public HashSet<List<Integer>> getCommunities() {
+		assignCommunityToEachNode();
+		int k = 2;
+		int size = this.communitySet.size();
+		int i = 1;
+		while(size > k) {
+			while(size > k) {
+				evaluateTheGainOfModularity();
+				int temp = this.communitySet.size();
+				if(temp == size) {
+					break;
+				}
+				size = temp;
+			}
+			double mod = modularity();
+			System.out.println(this.toString());
+			System.out.println("Gain" + i +" size=" + size + " edges=" + getNumEdges() 
+				+ " sum_edges=" + getAllLinks()+ " modularity=" + mod + "\n");
+
+			communityAggregation();
+			
+			mod = modularity();
+			System.out.println(this.toString());
+			System.out.println("Aggr" + i +" size=" + size + " edges=" + getNumEdges() 
+				+ " sum_edges=" + getAllLinks()+ " modularity=" + mod + "\n");
+			i++;
+			if(mod < 0) {
+				break;
+			}
+		}
+		HashSet<List<Integer>> path = new HashSet<List<Integer>>();
+		for(CommunityNode cn : communitySet) {
+			List<Integer> a = new ArrayList<Integer>();
+			for(Integer n : cn.getAllNodesSet()) {
+				a.add(n);
+			}
+
+			path.add(a);
+		}
+		return path;
+	}
 	
 	public static void main(String[] args) {
 		//String file = "facebook_1000.txt";
-		String file = "dij/test_2.txt";
+		String file = "dij/test_1.txt";
 		CapGraph graph = new CapGraph();		
 		
 		GraphLoader.loadGraph(graph, "data/" + file);
@@ -678,6 +721,9 @@ public class CapGraph implements Graph {
 			System.out.println("Aggr" + i +" size=" + size + " edges=" + graph.getNumEdges() 
 				+ " sum_edges=" + graph.getAllLinks()+ " modularity=" + mod + "\n");
 			i++;
+			if(mod < 0) {
+				break;
+			}
 		}
 	}
 
