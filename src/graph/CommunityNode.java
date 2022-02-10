@@ -1,3 +1,10 @@
+/**
+ * @author Aleksandr Solnyshkov.
+ * 
+ * Implementation of Community in a class
+ * named CommunityNode.  
+ *
+ */
 package graph;
 
 import java.util.HashMap;

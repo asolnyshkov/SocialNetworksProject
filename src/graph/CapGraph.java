@@ -480,7 +480,7 @@ public class CapGraph implements Graph {
 	/** 
 	 * For each node i we consider 
 	 * the neighbors j of i and 
-	 * we evaluate the gain of modularity.  
+	 * we evaluate the gain of modularity. 
 	 */
 	public void evaluateTheGainOfModularity() {
 		int m = getEdgesWeight();
